@@ -1,0 +1,7 @@
+conda create -n posformer python=3.10.13
+conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia
+pip install pytorch-lightning==1.4.9 torchmetrics==0.6.0
+pip install pandoc==2.4
+pip install sconf==0.2.5
+pip install mambapy==1.2.0
+pip install -r requirements.txt
