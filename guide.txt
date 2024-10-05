@@ -5,3 +5,4 @@ pip install pandoc==2.4
 pip install sconf==0.2.5
 pip install mambapy==1.2.0
 pip install -r requirements.txt
+pip install wandb
