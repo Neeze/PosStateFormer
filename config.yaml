@@ -16,7 +16,7 @@ trainer:
   # gpus: 0, 1, 2, 3  
   # accelerator: ddp
   check_val_every_n_epoch: 2
-  max_epochs: 300
+  max_epochs: 30
   deterministic: true
   num_sanity_val_steps: 1
   # resume_from_checkpoint: 
@@ -27,6 +27,9 @@ model:
   num_layers: 16
   # decoder
   nhead: 8
+  d_state: 256
+  expand_factor: 16
+  d_conv: 128
   num_decoder_layers: 3
   dim_feedforward: 1024
   dropout: 0.3
@@ -46,6 +49,6 @@ data:
   zipfile_path: data_crohme.zip
   test_year: '2014' 
   train_batch_size: 8
-  eval_batch_size: 4 
+  eval_batch_size: 8
   num_workers: 5
   scale_aug: True
