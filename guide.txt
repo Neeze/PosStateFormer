@@ -1,4 +1,5 @@
-conda create -n posformer python=3.10.13
+conda create -n hybridformer python=3.10.13
+conda activate hybridformer
 conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia
 pip install pytorch-lightning==1.4.9 torchmetrics==0.6.0
 pip install pandoc==2.4
