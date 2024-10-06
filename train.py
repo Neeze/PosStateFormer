@@ -73,4 +73,5 @@ if __name__ == "__main__":
     parser.add_argument("--config", type=str, required=True)
     args = parser.parse_args()
     config = Config(args.config)
+    print(config.dumps())
     train(config)
