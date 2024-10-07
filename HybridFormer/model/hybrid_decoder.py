@@ -88,7 +88,7 @@ class HybridDecoderLayer(nn.Module):
         # Implementation of Mamba model
         self.mamba_config = MambaConfig(n_layers=1, 
                                         d_model=d_model, 
-                                        d_state=n_state, 
+                                        d_state=d_state, 
                                         bias=True)
         self.mamba = MambaBlock(self.mamba_config)
         # Implementation of Feedforward model
