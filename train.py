@@ -1,10 +1,32 @@
 import pytorch_lightning as pl
 from HybridFormer.datamodule import CROHMEDatamodule
 from HybridFormer.lit_hybridformer import LitPosFormer
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import (
+    LearningRateMonitor,
+    ModelCheckpoint,
+    Callback,
+)
 from pytorch_lightning.loggers import WandbLogger as Logger
 import argparse
 from sconf import Config
+
+
+class GradNormCallback(Callback):
+    """
+    Logs the gradient norm.
+    """
+    @staticmethod
+    def gradient_norm(model):
+        total_norm = 0.0
+        for p in model.parameters():
+            if p.grad is not None:
+                param_norm = p.grad.detach().data.norm(2)
+                total_norm += param_norm.item() ** 2
+        total_norm = total_norm**0.5
+        return total_norm
+
+    def on_after_backward(self, trainer, model):
+        model.log("train/grad_norm", self.gradient_norm(model))
 
 def train(config):
     pl.seed_everything(config.seed_everything, workers=True)
@@ -18,8 +40,6 @@ def train(config):
         # decoder
         nhead = config.model.nhead,
         d_state = config.model.d_state,
-        expand_factor = config.model.expand_factor,
-        d_conv = config.model.d_conv,
         num_decoder_layers = config.model.num_decoder_layers,
         dim_feedforward = config.model.dim_feedforward,
         dropout = config.model.dropout,
@@ -35,6 +55,8 @@ def train(config):
         # training
         warmup_steps = config.model.warmup_steps,
         learning_rate = config.model.learning_rate,
+        min_learning_rate = config.model.min_learning_rate,
+        gamma = config.model.gamma,
         patience = config.model.patience,
     )
     data_module = CROHMEDatamodule(
@@ -45,25 +67,29 @@ def train(config):
         num_workers = config.data.num_workers,
         scale_aug = config.data.scale_aug,)
     
-    logger = Logger("HybridFormer Project", project="hybridformer", config=dict(config), log_model='all')
+    logger = Logger("HybridFormer Project", project="hybridformer-bimamba", config=dict(config), log_model='all')
     logger.watch(model_module.model, log="all", log_freq=100)
 
-    lr_callback = pl.callbacks.LearningRateMonitor(logging_interval=config.trainer.callbacks[0].init_args.logging_interval)
+    lr_callback = LearningRateMonitor(logging_interval=config.trainer.callbacks[0].init_args.logging_interval)
 
-    checkpoint_callback = pl.callbacks.ModelCheckpoint(save_top_k=config.trainer.callbacks[1].init_args.save_top_k, 
+    checkpoint_callback = ModelCheckpoint(save_top_k=config.trainer.callbacks[1].init_args.save_top_k, 
                                                        monitor=config.trainer.callbacks[1].init_args.monitor, 
                                                        mode=config.trainer.callbacks[1].init_args.mode,
                                                        filename=config.trainer.callbacks[1].init_args.filename)
+    grad_norm_callback = GradNormCallback()
     
     trainer = pl.Trainer(
         devices=config.trainer.gpus,
         accelerator=config.trainer.accelerator,
+        val_check_interval=1.0,
         check_val_every_n_epoch=config.trainer.check_val_every_n_epoch,
         max_epochs=config.trainer.max_epochs,
         logger=logger,
         deterministic=config.trainer.deterministic,
         num_sanity_val_steps=config.trainer.num_sanity_val_steps,
-        callbacks = [lr_callback, checkpoint_callback],
+        callbacks = [lr_callback, 
+                     grad_norm_callback, 
+                     checkpoint_callback],
     )
 
     trainer.fit(model_module, data_module)
