@@ -18,8 +18,6 @@ def train(config):
         # decoder
         nhead = config.model.nhead,
         d_state = config.model.d_state,
-        expand_factor = config.model.expand_factor,
-        d_conv = config.model.d_conv,
         num_decoder_layers = config.model.num_decoder_layers,
         dim_feedforward = config.model.dim_feedforward,
         dropout = config.model.dropout,

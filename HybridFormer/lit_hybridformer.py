@@ -27,8 +27,6 @@ class LitPosFormer(pl.LightningModule):
         # decoder
         nhead: int,
         d_state: int,
-        expand_factor: int,
-        d_conv: int,
         num_decoder_layers: int,
         dim_feedforward: int,
         dropout: float,
@@ -55,8 +53,6 @@ class LitPosFormer(pl.LightningModule):
             num_layers=num_layers,
             nhead=nhead,
             d_state=d_state,
-            expand_factor=expand_factor,
-            d_conv=d_conv,
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,

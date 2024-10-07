@@ -19,6 +19,46 @@ from HybridFormer.model.pos_enc import WordPosEnc
 from HybridFormer.utils.generation_utils import DecodeModel, PosDecodeModel
 
 
+class BiMambaBlock(nn.Module):
+    def __init__(self, d_model, n_state):
+        super(BiMambaBlock, self).__init__()
+        self.d_model = d_model
+        self.mamba_config = MambaConfig(n_layers=1, 
+                                        d_model=d_model, 
+                                        d_state=n_state, 
+                                        bias=True)
+        self.mamba = MambaBlock(self.mamba_config)
+
+        # Norm and feed-forward network layer
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.feed_forward = nn.Sequential(
+            nn.Linear(d_model, d_model * 4),
+            nn.GELU(),
+            nn.Linear(d_model * 4, d_model)
+        )
+
+    def forward(self, x):
+        # Residual connection of the original input
+        residual = x
+        
+        # Forward Mamba
+        x_norm = self.norm1(x)
+        mamba_out_forward = self.mamba(x_norm)
+
+        # Backward Mamba
+        x_flip = torch.flip(x_norm, dims=[1])  # Flip Sequence
+        mamba_out_backward = self.mamba(x_flip)
+        mamba_out_backward = torch.flip(mamba_out_backward, dims=[1])  # Flip back
+
+        # Combining forward and backward
+        mamba_out = mamba_out_forward + mamba_out_backward
+        
+        mamba_out = self.norm2(mamba_out)
+        ff_out = self.feed_forward(mamba_out)
+
+        output = ff_out + residual
+        return output
 
 def _get_clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
@@ -78,26 +118,15 @@ class HybridDecoderLayer(nn.Module):
                  d_model, 
                  nhead, 
                  d_state: int, 
-                 expand_factor: int,
-                 d_conv: int,
-                 bias: bool,
                  dim_feedforward=2048, 
                  dropout=0.1,
                  eps=1e-5,):
         super(HybridDecoderLayer, self).__init__()
-        self.mamba_config = MambaConfig(
-            n_layers=1,
-            d_model=d_model,
-            d_state=d_state,
-            expand_factor=expand_factor,
-            d_conv=d_conv,
-            bias=bias,
-        )
         self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
 
         # Implementation of Mamba model
-        self.mamba = MambaBlock(self.mamba_config)
+        self.mamba = BiMambaBlock(d_model, d_state)
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.dropout = nn.Dropout(dropout)
@@ -185,8 +214,6 @@ def _build_transformer_decoder(
     d_model: int,
     nhead: int,
     d_state: int,
-    expand_factor: int,
-    d_conv: int,
     num_decoder_layers: int,
     dim_feedforward: int,
     dropout: float,
@@ -198,9 +225,6 @@ def _build_transformer_decoder(
         d_model=d_model,
         nhead=nhead,
         d_state=d_state, 
-        expand_factor=expand_factor,
-        d_conv=d_conv,
-        bias=True,
         dim_feedforward=dim_feedforward,
         dropout=dropout,
     )
@@ -218,8 +242,6 @@ class Decoder(DecodeModel):
         d_model: int,
         nhead: int,
         d_state: int,
-        expand_factor: int,
-        d_conv: int,
         num_decoder_layers: int,
         dim_feedforward: int,
         dropout: float,
@@ -240,8 +262,6 @@ class Decoder(DecodeModel):
             d_model=d_model,
             nhead=nhead,
             d_state=d_state,
-            expand_factor=expand_factor,
-            d_conv=d_conv,
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
@@ -325,8 +345,6 @@ class PosDecoder(PosDecodeModel):
         d_model: int,
         nhead: int,
         d_state: int,   
-        expand_factor: int,
-        d_conv: int,
         num_decoder_layers: int,
         dim_feedforward: int,
         dropout: float,
@@ -346,8 +364,6 @@ class PosDecoder(PosDecodeModel):
             d_model=d_model,
             nhead=nhead,
             d_state=d_state,
-            expand_factor=expand_factor,
-            d_conv=d_conv,
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
