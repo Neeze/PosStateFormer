@@ -33,6 +33,7 @@ def train(config):
         early_stopping = config.model.early_stopping,
         temperature = config.model.temperature,
         # training
+        warmup_steps = config.model.warmup_steps,
         learning_rate = config.model.learning_rate,
         patience = config.model.patience,
     )

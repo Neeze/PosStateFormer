@@ -1,6 +1,7 @@
 import zipfile
 from typing import List , Tuple
 import time
+import math
 import torch
 import pytorch_lightning as pl
 import torch.optim as optim
@@ -41,6 +42,7 @@ class LitPosFormer(pl.LightningModule):
         early_stopping: bool,
         temperature: float,
         # training
+        warmup_steps: int,
         learning_rate: float,
         patience: int,
     ):
@@ -179,19 +181,35 @@ class LitPosFormer(pl.LightningModule):
         return self.model.beam_search(img, mask, **self.hparams)
 
     def configure_optimizers(self):
-        optimizer = optim.SGD(
+        # optimizer = optim.SGD(
+        #     self.parameters(),
+        #     lr=self.hparams.learning_rate,
+        #     momentum=0.9,
+        #     weight_decay=1e-4,
+        # )
+
+        optimizer = optim.AdamW(
             self.parameters(),
             lr=self.hparams.learning_rate,
-            momentum=0.9,
+            betas=(0.9, 0.999),
+            eps=1e-8,
             weight_decay=1e-4,
         )
-        
-        reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+
+
+        # reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        #     optimizer,
+        #     mode="max",
+        #     factor=0.25,
+        #     patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
+        # )
+
+        reduce_scheduler = self.cosine_scheduler(
             optimizer,
-            mode="max",
-            factor=0.25,
-            patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
+            training_steps=self.trainer.max_steps,
+            warmup_steps=self.hparams.warmup_steps,
         )
+
         scheduler = {
             "scheduler": reduce_scheduler,
             "monitor": "val_ExpRate",
@@ -201,3 +219,14 @@ class LitPosFormer(pl.LightningModule):
         }
         
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+    
+    @staticmethod
+    def cosine_scheduler(optimizer, training_steps, warmup_steps):
+        def lr_lambda(current_step):
+            if current_step < warmup_steps:
+                return current_step / max(1, warmup_steps)
+            progress = current_step - warmup_steps
+            progress /= max(1, training_steps - warmup_steps)
+            return max(0.0, 0.5 * (1.0 + math.cos(math.pi * progress)))
+
+        return optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)

@@ -43,6 +43,7 @@ model:
   early_stopping: false
   temperature: 1.0
   # training
+  warmup_steps: 20000
   learning_rate: 0.08
   patience: 20
 data:
