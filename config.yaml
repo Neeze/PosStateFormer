@@ -16,7 +16,7 @@ trainer:
   # gpus: 0, 1, 2, 3  
   accelerator: gpu
   check_val_every_n_epoch: 2
-  max_epochs: 250
+  max_epochs: 300
   deterministic: true
   num_sanity_val_steps: 1
   # resume_from_checkpoint: 
