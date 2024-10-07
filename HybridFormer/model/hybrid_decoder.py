@@ -171,7 +171,7 @@ class HybridDecoderLayer(nn.Module):
         tgt = self.norm2(tgt) # l b d 
 
         tgt = rearrange(tgt, "l b d -> b l d")
-        tgt = tgt + self.dropout3(self.mamba(tgt)[0])
+        tgt = tgt + self.dropout3(self.mamba(tgt))
         tgt = rearrange(tgt, "b l d -> l b d")
         tgt = self.norm3(tgt)
 
