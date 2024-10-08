@@ -55,6 +55,8 @@ def train(config):
         # training
         warmup_steps = config.model.warmup_steps,
         learning_rate = config.model.learning_rate,
+        min_learning_rate = config.model.min_learning_rate,
+        gamma = config.model.gamma,
         patience = config.model.patience,
     )
     data_module = CROHMEDatamodule(
@@ -65,7 +67,7 @@ def train(config):
         num_workers = config.data.num_workers,
         scale_aug = config.data.scale_aug,)
     
-    logger = Logger("HybridFormer Project", project="hybridformer", config=dict(config), log_model='all')
+    logger = Logger("HybridFormer Project", project="hybridformer-bimamba", config=dict(config), log_model='all')
     logger.watch(model_module.model, log="all", log_freq=100)
 
     lr_callback = LearningRateMonitor(logging_interval=config.trainer.callbacks[0].init_args.logging_interval)

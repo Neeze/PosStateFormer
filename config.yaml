@@ -27,8 +27,8 @@ model:
   num_layers: 10
   # decoder
   nhead: 8
-  d_state: 32
-  num_decoder_layers: 3
+  d_state: 16
+  num_decoder_layers: 2
   dim_feedforward: 1024
   dropout: 0.3
   dc: 32
@@ -41,8 +41,10 @@ model:
   early_stopping: false
   temperature: 1.0
   # training
-  warmup_steps: null
+  warmup_steps: 250
   learning_rate: 0.08
+  min_learning_rate: 5e-6
+  gamma: 0.955
   patience: 20
 data:
   zipfile_path: data_crohme.zip

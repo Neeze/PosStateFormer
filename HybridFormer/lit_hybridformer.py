@@ -42,6 +42,8 @@ class LitPosFormer(pl.LightningModule):
         # training
         warmup_steps: int,
         learning_rate: float,
+        min_learning_rate:float,
+        gamma:float,
         patience: int,
     ):
         super().__init__()
@@ -189,7 +191,7 @@ class LitPosFormer(pl.LightningModule):
             lr=self.hparams.learning_rate,
             betas=(0.9, 0.999),
             eps=1e-8,
-            weight_decay=1e-4,
+            weight_decay=1e-6,
         )
 
 
@@ -200,17 +202,32 @@ class LitPosFormer(pl.LightningModule):
         #     patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
         # )
 
-        reduce_scheduler = self.cosine_scheduler(
-            optimizer,
-            training_steps=self.trainer.max_steps,
-            warmup_steps=self.hparams.warmup_steps,
-        )
+        # reduce_scheduler = self.cosine_scheduler(
+        #     optimizer,
+        #     training_steps=self.trainer.max_steps,
+        #     warmup_steps=self.hparams.warmup_steps,
+        # )
 
+        # scheduler = {
+        #     "scheduler": reduce_scheduler,
+        #     "monitor": "val_ExpRate",
+        #     "interval": "epoch",
+        #     "frequency": self.trainer.check_val_every_n_epoch,
+        #     "strict": True,
+        # }
+
+        reduce_scheduler = self.exponential_scheduler(
+                optimizer,
+                self.hparams.warmup_steps,
+                self.hparams.learning_rate,
+                self.hparams.min_learning_rate,
+                self.hparams.gamma,
+            )
         scheduler = {
             "scheduler": reduce_scheduler,
             "monitor": "val_ExpRate",
-            "interval": "epoch",
-            "frequency": self.trainer.check_val_every_n_epoch,
+            "interval": "step",
+            "frequency": 20,
             "strict": True,
         }
         
@@ -226,3 +243,16 @@ class LitPosFormer(pl.LightningModule):
             return max(0.0, 0.5 * (1.0 + math.cos(math.pi * progress)))
 
         return optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
+    
+    @staticmethod
+    def exponential_scheduler(optimizer, warmup_steps, lr, min_lr=5e-5, gamma=0.9999):
+        def lr_lambda(x):
+            if x > warmup_steps or warmup_steps <= 0:
+                if lr * gamma ** (x - warmup_steps) > min_lr:
+                    return gamma ** (x - warmup_steps)
+                else:
+                    return min_lr / lr
+            else:
+                return x / warmup_steps
+
+        return optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_lambda)

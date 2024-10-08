@@ -128,9 +128,9 @@ class HybridDecoderLayer(nn.Module):
         # Implementation of Mamba model
         self.mamba = BiMambaBlock(d_model, d_state)
         # Implementation of Feedforward model
-        self.linear1 = nn.Linear(d_model, dim_feedforward)
-        self.dropout = nn.Dropout(dropout)
-        self.linear2 = nn.Linear(dim_feedforward, d_model)
+        # self.linear1 = nn.Linear(d_model, dim_feedforward)
+        # self.dropout = nn.Dropout(dropout)
+        # self.linear2 = nn.Linear(dim_feedforward, d_model)
 
         # self.norm1 = nn.LayerNorm(d_model)
         # self.norm2 = nn.LayerNorm(d_model)
@@ -141,14 +141,14 @@ class HybridDecoderLayer(nn.Module):
         self.norm1 = RMSNorm(d_model=d_model, eps=eps)
         self.norm2 = RMSNorm(d_model=d_model, eps=eps)
         self.norm3 = RMSNorm(d_model=d_model, eps=eps)
-        self.norm4 = RMSNorm(d_model=d_model, eps=eps)
+        # self.norm4 = RMSNorm(d_model=d_model, eps=eps)
 
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
         self.dropout3 = nn.Dropout(dropout)
-        self.dropout4 = nn.Dropout(dropout)
+        # self.dropout4 = nn.Dropout(dropout)
 
-        self.activation = F.relu
+        # self.activation = F.relu
 
     def __setstate__(self, state):
         if "activation" not in state:
@@ -204,9 +204,9 @@ class HybridDecoderLayer(nn.Module):
         tgt = rearrange(tgt, "b l d -> l b d")
         tgt = self.norm3(tgt)
 
-        tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
-        tgt = tgt + self.dropout4(tgt2)
-        tgt = self.norm4(tgt)
+        # tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
+        # tgt = tgt + self.dropout4(tgt2)
+        # tgt = self.norm4(tgt)
         return tgt, attn
 
 
