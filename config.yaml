@@ -15,7 +15,7 @@ trainer:
   gpus: 1
   # gpus: 0, 1, 2, 3  
   accelerator: gpu
-  check_val_every_n_epoch: 10
+  check_val_every_n_epoch: 2
   max_epochs: 300
   deterministic: true
   num_sanity_val_steps: 1
@@ -35,21 +35,21 @@ model:
   cross_coverage: true
   self_coverage: true
   # beam search
-  beam_size: 10
+  beam_size: 5
   max_len: 200
   alpha: 1.0
-  early_stopping: false
+  early_stopping: true
   temperature: 1.0
   # training
   warmup_steps: 250
   learning_rate: 0.05
   min_learning_rate: 5e-5
-  gamma: 0.9996
+  gamma: 0.955
   patience: 20
 data:
   zipfile_path: data_crohme.zip
   test_year: '2014' 
-  train_batch_size: 8
-  eval_batch_size: 4
+  train_batch_size: 4
+  eval_batch_size: 2
   num_workers: 5
   scale_aug: True

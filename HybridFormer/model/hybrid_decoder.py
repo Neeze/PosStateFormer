@@ -80,7 +80,7 @@ class HybridDecoderLayer(nn.Module):
                  d_state: int, 
                  dim_feedforward=2048, 
                  dropout=0.1,
-                 eps=1e-5,):
+                 eps=1e-2,):
         super(HybridDecoderLayer, self).__init__()
         self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
@@ -146,11 +146,20 @@ class HybridDecoderLayer(nn.Module):
         Shape:
             see the docs in Transformer class.
         """
+        # Self-Attention
         tgt2 = self.self_attn(
             tgt, tgt, tgt, attn_mask=tgt_mask, key_padding_mask=tgt_key_padding_mask
         )[0]
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
+
+        # Mamba
+        tgt = rearrange(tgt, "l b d -> b l d")
+        tgt = tgt + self.dropout3(self.mamba(tgt))
+        tgt = rearrange(tgt, "b l d -> l b d")
+        tgt = self.norm3(tgt)
+
+        # Cross-Attention
         tgt2, attn = self.multihead_attn(
             tgt,
             memory,
@@ -163,11 +172,12 @@ class HybridDecoderLayer(nn.Module):
         tgt = tgt + self.dropout2(tgt2)
         tgt = self.norm2(tgt) # l b d 
 
-        tgt = rearrange(tgt, "l b d -> b l d")
-        tgt = tgt + self.dropout3(self.mamba(tgt))
-        tgt = rearrange(tgt, "b l d -> l b d")
-        tgt = self.norm3(tgt)
-
+        # tgt = rearrange(tgt, "l b d -> b l d")
+        # tgt = tgt + self.dropout3(self.mamba(tgt))
+        # tgt = rearrange(tgt, "b l d -> l b d")
+        # tgt = self.norm3(tgt)
+        
+        # Feedforward
         tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
         tgt = tgt + self.dropout4(tgt2)
         tgt = self.norm4(tgt)

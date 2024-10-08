@@ -227,7 +227,7 @@ class LitPosFormer(pl.LightningModule):
             "scheduler": reduce_scheduler,
             "monitor": "val_ExpRate",
             "interval": "step",
-            "frequency": 1,
+            "frequency": 100,
             "strict": True,
         }
         
