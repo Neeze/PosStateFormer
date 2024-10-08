@@ -13,7 +13,6 @@ trainer:
         filename: '{epoch}-{step}-{val_ExpRate:.4f}'
   default_root_dir: 'lightning_logs/version_0'
   gpus: 2
-  strategy: ddp
   # gpus: 0, 1, 2, 3  
   accelerator: gpu
   check_val_every_n_epoch: 2

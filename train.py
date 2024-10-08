@@ -80,7 +80,6 @@ def train(config):
     
     trainer = pl.Trainer(
         devices=config.trainer.gpus,
-        strategy=config.trainer.strategy,
         accelerator=config.trainer.accelerator,
         val_check_interval=1.0,
         check_val_every_n_epoch=config.trainer.check_val_every_n_epoch,
