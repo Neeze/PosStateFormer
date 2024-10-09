@@ -1,2 +1,5 @@
 **/**/__pycache__/
 test.py
+test_swin.py
+test_dense.py
+data_crohme.zip

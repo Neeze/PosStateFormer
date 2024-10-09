@@ -22,7 +22,7 @@ class CROHMEDataset(Dataset):
             trans_list.append(ScaleAugmentation(K_MIN, K_MAX))
 
         trans_list += [
-            ScaleToLimitRange(w_lo=W_LO, w_hi=W_HI, h_lo=H_LO, h_hi=H_HI),
+            # ScaleToLimitRange(w_lo=W_LO, w_hi=W_HI, h_lo=H_LO, h_hi=H_HI),
             tr.ToTensor(),
         ]
         self.transform = tr.Compose(trans_list)

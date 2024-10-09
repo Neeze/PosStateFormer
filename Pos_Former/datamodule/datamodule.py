@@ -93,6 +93,7 @@ def extract_data(archive: ZipFile, dir_name: str) -> Data:
         with archive.open(f"data/{dir_name}/img/{img_name}.bmp", "r") as f:
             # move image to memory immediately, avoid lazy loading, which will lead to None pointer error in loading
             img = Image.open(f).copy()
+            img = img.resize((224, 224))
             data.append((img_name, img, formula))
 
     print(f"Extract data from: {dir_name}, with data size: {len(data)}")
