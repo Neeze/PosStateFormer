@@ -96,7 +96,7 @@ class GroupedQueryAttention(nn.Module):
             num_kv_groups,
             dtype=torch.float16
         ):
-        super().__init__()
+        super(GroupedQueryAttention, self).__init__()
         assert d_out % num_heads == 0, "d_out must be divisible by num_heads"
         assert num_heads % num_kv_groups == 0, "num_heads must be divisible by num_kv_groups"
 
