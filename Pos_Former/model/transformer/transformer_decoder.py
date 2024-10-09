@@ -64,13 +64,24 @@ class TransformerDecoder(nn.Module):
         return output, attn
 
 
+class FeedForward(nn.Module):
+    def __init__(self, d_model, dim_feedforward):
+        super().__init__()
+        self.fc1 = nn.Linear(d_model, dim_feedforward, bias=False)
+        self.fc2 = nn.Linear(d_model, dim_feedforward, bias=False)
+        self.fc3 = nn.Linear(dim_feedforward, d_model, bias=False)
+
+    def forward(self, x):
+        x_fc1 = self.fc1(x)
+        x_fc2 = self.fc2(x)
+        x = nn.functional.silu(x_fc1) * x_fc2
+        return self.fc3(x)
+
 class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
         self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
-
-
         assert nhead >= 4, "Num of head must > 4 to using Group Query Attention"
         self.group_attn = GroupedQueryAttention(d_in=d_model,
                                                 d_out=d_model,
@@ -78,13 +89,14 @@ class TransformerDecoderLayer(nn.Module):
                                                 num_kv_groups=nhead//4)
 
         # Implementation of Feedforward model
-        self.linear1 = nn.Linear(d_model, dim_feedforward)
-        self.dropout = nn.Dropout(dropout)
-        self.linear2 = nn.Linear(dim_feedforward, d_model)
+        # self.linear1 = nn.Linear(d_model, dim_feedforward)
+        # self.dropout = nn.Dropout(dropout)
+        # self.linear2 = nn.Linear(dim_feedforward, d_model)
+        self.ff = FeedForward(d_model=d_model, dim_feedforward=dim_feedforward)
 
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.norm3 = nn.LayerNorm(d_model)
+        self.norm1 = nn.RMSNorm(d_model, eps=1e-5)
+        self.norm2 = nn.RMSNorm(d_model, eps=1e-5)
+        self.norm3 = nn.RMSNorm(d_model, eps=1e-5)
 
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
@@ -151,7 +163,8 @@ class TransformerDecoderLayer(nn.Module):
 
         tgt = tgt + self.dropout2(tgt2)
         tgt = self.norm2(tgt)
-        tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
+        # tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
+        tgt2 = self.ff(tgt)
         tgt = tgt + self.dropout3(tgt2)
         tgt = self.norm3(tgt)
         return tgt, attn

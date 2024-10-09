@@ -93,8 +93,7 @@ class GroupedQueryAttention(nn.Module):
             d_in, 
             d_out,
             num_heads,
-            num_kv_groups,
-            dtype=torch.float16
+            num_kv_groups
         ):
         super(GroupedQueryAttention, self).__init__()
         assert d_out % num_heads == 0, "d_out must be divisible by num_heads"
@@ -104,13 +103,13 @@ class GroupedQueryAttention(nn.Module):
         self.num_heads = num_heads
         self.head_dim = d_out // num_heads
 
-        self.W_key = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False, dtype=dtype)
-        self.W_value = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False, dtype=dtype)
+        self.W_key = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False)
+        self.W_value = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False)
         self.num_kv_groups = num_kv_groups
         self.group_size = num_heads // num_kv_groups
 
-        self.W_query = nn.Linear(d_in, d_out, bias=False, dtype=dtype)
-        self.out_proj = nn.Linear(d_out, d_out, bias=False, dtype=dtype)
+        self.W_query = nn.Linear(d_in, d_out, bias=False)
+        self.out_proj = nn.Linear(d_out, d_out, bias=False)
 
         # Fetch buffers using SharedBuffers
         # mask, cos, sin = SharedBuffers.get_buffers(context_length, self.head_dim, rope_base, rope_config, dtype)
