@@ -8,6 +8,7 @@ from torch import Tensor
 
 from .arm import AttentionRefinementModule
 from .attention import MultiheadAttention
+from .group_query_attention import GroupedQueryAttention
 
 
 def _get_clones(module, N):
@@ -67,7 +68,15 @@ class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
         self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
-        self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+
+
+        assert nhead >= 4, "Num of head must > 4 to using Group Query Attention"
+        self.group_attn = GroupedQueryAttention(d_in=d_model,
+                                                d_out=d_model,
+                                                num_heads=nhead,
+                                                num_kv_groups=nhead//4)
+
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.dropout = nn.Dropout(dropout)
@@ -117,15 +126,29 @@ class TransformerDecoderLayer(nn.Module):
         )[0]
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
-        tgt2, attn = self.multihead_attn(
-            tgt,
-            memory,
-            memory,
+
+        # Implement Multihead-Attention
+        # tgt2, attn = self.multihead_attn(
+        #     tgt,
+        #     memory,
+        #     memory,
+        #     arm=arm,
+        #     attn_mask=memory_mask,
+        #     key_padding_mask=memory_key_padding_mask,
+        #     tgt_vocab=tgt_vocab,
+        # )
+
+        # Implement Group Query Attention
+        tgt2, attn = self.group_attn(
+            query=tgt,
+            key=memory,
+            value=memory,
             arm=arm,
             attn_mask=memory_mask,
             key_padding_mask=memory_key_padding_mask,
             tgt_vocab=tgt_vocab,
         )
+
         tgt = tgt + self.dropout2(tgt2)
         tgt = self.norm2(tgt)
         tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
