@@ -80,7 +80,7 @@ class FeedForward(nn.Module):
 class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
-        self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         assert nhead >= 4, "Num of head must > 4 to using Group Query Attention"
         self.group_attn = GroupedQueryAttention(d_in=d_model,
