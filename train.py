@@ -1,6 +1,7 @@
 import pytorch_lightning as pl
 from Pos_Former.datamodule import CROHMEDatamodule
 from Pos_Former.lit_posformer import LitPosFormer
+from pytorch_lightning.plugins.training_type.ddp import DDPPlugin
 from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     ModelCheckpoint,
@@ -83,6 +84,7 @@ def train(config):
         logger=logger,
         deterministic=config.trainer.deterministic,
         num_sanity_val_steps=config.trainer.num_sanity_val_steps,
+        plugins=DDPPlugin(find_unused_parameters=False),
         callbacks = [lr_callback, 
                      grad_norm_callback, 
                      checkpoint_callback],
