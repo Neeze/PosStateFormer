@@ -84,7 +84,6 @@ def train(config):
         logger=logger,
         deterministic=config.trainer.deterministic,
         num_sanity_val_steps=config.trainer.num_sanity_val_steps,
-        plugins=DDPPlugin(find_unused_parameters=False),
         callbacks = [lr_callback, 
                      grad_norm_callback, 
                      checkpoint_callback],
