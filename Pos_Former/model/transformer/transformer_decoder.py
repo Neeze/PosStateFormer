@@ -92,9 +92,9 @@ class TransformerDecoderLayer(nn.Module):
 
         self.ff = FeedForward(d_model=d_model, dim_feedforward=dim_feedforward)
 
-        self.norm1 = nn.RMSNorm(d_model, eps=1e-5)
-        self.norm2 = nn.RMSNorm(d_model, eps=1e-5)
-        self.norm3 = nn.RMSNorm(d_model, eps=1e-5)
+        self.norm1 = nn.RMSNorm(d_model, eps=1e-4)
+        self.norm2 = nn.RMSNorm(d_model, eps=1e-4)
+        self.norm3 = nn.RMSNorm(d_model, eps=1e-4)
 
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
