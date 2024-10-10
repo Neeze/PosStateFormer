@@ -183,7 +183,9 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply ARM if provided
         if arm is not None and target_vocab is not None:
-            attn_output_weights = attn_scores - arm(attn_scores, target_vocab)
+            attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"), target_vocab)
+            attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
+            attn_output_weights = attn_scores - attention_refine_reshape
         else:
             attn_output_weights = attn_scores
 
@@ -201,6 +203,8 @@ class GroupedQueryAttention(nn.Module):
 
         # Final linear projection
         attn_output = self.out_proj(context_vec)
+
+        attn_output_weights = rearrange(attn_output_weights, "b n t s -> (b n) t s")
 
         if need_weights:
             return attn_output, attn_output_weights
