@@ -91,10 +91,11 @@ class SharedBuffers:
 class GroupedQueryAttention(nn.Module):
     def __init__(
             self, 
-            d_in, 
-            d_out,
-            num_heads,
-            num_kv_groups
+            d_in: int, 
+            d_out: int,
+            num_heads: int,
+            num_kv_groups: int,
+            dropout: float = 0.0,
         ):
         super(GroupedQueryAttention, self).__init__()
         assert d_out % num_heads == 0, "d_out must be divisible by num_heads"
@@ -112,11 +113,7 @@ class GroupedQueryAttention(nn.Module):
         self.W_query = nn.Linear(d_in, d_out, bias=False)
         self.out_proj = nn.Linear(d_out, d_out, bias=False)
 
-        # Fetch buffers using SharedBuffers
-        # mask, cos, sin = SharedBuffers.get_buffers(context_length, self.head_dim, rope_base, rope_config, dtype)
-        # self.register_buffer("mask", mask)
-        # self.register_buffer("cos", cos)
-        # self.register_buffer("sin", sin)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, 
                 query: Tensor, 
@@ -192,7 +189,7 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply softmax and dropout
         attn_output_weights = F.softmax(attn_output_weights, dim=-1)
-        # attn_output_weights = self.dropout(attn_output_weights)
+        attn_output_weights = self.dropout(attn_output_weights)
 
         context_vec = (attn_output_weights @ values).transpose(1, 2)
 

@@ -88,7 +88,8 @@ class TransformerDecoderLayer(nn.Module):
         self.group_attn = GroupedQueryAttention(d_in=d_model,
                                                 d_out=d_model,
                                                 num_heads=nhead,
-                                                num_kv_groups=nhead//4)
+                                                num_kv_groups=nhead//4,
+                                                dropout=dropout)
 
         self.ff = FeedForward(d_model=d_model, dim_feedforward=dim_feedforward)
 
