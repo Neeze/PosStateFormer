@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from typing import Optional, Tuple
 from .arm import AttentionRefinementModule
 from torch import Tensor
+from einops import rearrange
 
 def precompute_rope_params(head_dim, theta_base=10000, context_length=4096, freq_config=None):
     assert head_dim % 2 == 0, "Embedding dimension must be even"
@@ -130,24 +131,25 @@ class GroupedQueryAttention(nn.Module):
         Forward pass for GroupedQueryAttention module.
         
         Args:
-            query (Tensor): The query embeddings of shape (L, N, E), where L is the target sequence length,
+            query (Tensor): The query embeddings of shape (B, L, D), where L is the target sequence length,
                             N is the batch size, and E is the embedding dimension.
-            key (Tensor): The key embeddings of shape (S, N, E), where S is the source sequence length,
+            key (Tensor): The key embeddings of shape (B, L, D), where S is the source sequence length,
                           N is the batch size, and E is the embedding dimension.
-            value (Tensor): The value embeddings of shape (S, N, E), where S is the source sequence length,
+            value (Tensor): The value embeddings of shape (B, L, D), where S is the source sequence length,
                             N is the batch size, and E is the embedding dimension.
             key_padding_mask (Optional[Tensor]): If provided, specifies padding elements in the key.
-                                                 Shape should be (N, S), where N is the batch size and S is the source sequence length.
+                                                 Shape should be (B, L), where N is the batch size and S is the source sequence length.
             attn_mask (Optional[Tensor]): If provided, specifies positions that should be masked.
                                           Shape should be (L, S), where L is the target sequence length and S is the source sequence length.
             target_vocab (Optional[Tensor]): If provided, specifies the target vocabulary.
-                                            Shape should be (N, L), where N is the batch size and L is the target sequence length.
+                                            Shape should be (B, L), where N is the batch size and L is the target sequence length.
         Returns:
-            attn_output (Tensor): The output embeddings of shape (L, N, E), where L is the target sequence length,
+            attn_output (Tensor): The output embeddings of shape (B, L, D), where L is the target sequence length,
                                   N is the batch size, and E is the embedding dimension.
-            attn_output_weights (Optional[Tensor]): The attention weights of shape (N, L, S), where N is the batch size,
+            attn_output_weights (Optional[Tensor]): The attention weights of shape (B, L, S), where N is the batch size,
                                                     L is the target sequence length, and S is the source sequence length.
         """
+        
         b, num_tokens, d_in = query.shape
 
         # Project query, key, and value

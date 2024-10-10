@@ -115,9 +115,14 @@ class Decoder(DecodeModel):
         tgt = self.norm(tgt)
         
         h = src.shape[1]
-        src = rearrange(src, "b h w d -> (h w) b d")
+        # src = rearrange(src, "b h w d -> (h w) b d")
+        # src_mask = rearrange(src_mask, "b h w -> b (h w)")
+        # tgt = rearrange(tgt, "b l d -> l b d")
+
+        src = rearrange(src, "b h w d -> b (h w) d")
         src_mask = rearrange(src_mask, "b h w -> b (h w)")
-        tgt = rearrange(tgt, "b l d -> l b d")
+        # tgt = rearrange(tgt, "b l d -> l b d")
+        
 
         out, attn  = self.model(
             tgt=tgt,
@@ -129,8 +134,9 @@ class Decoder(DecodeModel):
             tgt_vocab=tgt_vocab,
         )
     
-        out_rearrange = rearrange(out, "l b d -> b l d")
-        out = self.proj(out_rearrange)
+        # out_rearrange = rearrange(out, "l b d -> b l d")
+        # out = self.proj(out_rearrange)
+        out = self.proj(out)
         return out, attn
 
     def transform(
