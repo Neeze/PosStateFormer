@@ -2,3 +2,4 @@
 test_**.py
 test.py
 data_crohme.zip
+wandb
