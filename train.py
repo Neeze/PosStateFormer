@@ -92,10 +92,10 @@ def train(config):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--config", type=str, default='config.yaml', required=True)
-    # args = parser.parse_args()
-    # config = Config(args.config)
-    config = Config('config.yaml')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, default='config.yaml', required=True)
+    args = parser.parse_args()
+    config = Config(args.config)
+    # config = Config('config.yaml')
     print(config.dumps())
     train(config)
