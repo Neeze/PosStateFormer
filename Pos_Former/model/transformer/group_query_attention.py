@@ -159,17 +159,13 @@ class GroupedQueryAttention(nn.Module):
 
         # Reshape queries, keys, and values
         queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
-        keys = keys.view(b, num_tokens, self.num_kv_groups, self.head_dim)
-        values = values.view(b, num_tokens, self.num_kv_groups, self.head_dim)
+        keys = keys.view(b, -1, self.num_kv_groups, self.head_dim)
+        values = values.view(b, -1, self.num_kv_groups, self.head_dim)
 
         # Transpose keys, values, and queries
         keys = keys.transpose(1, 2)  # Shape: (b, num_heads, num_tokens, head_dim)
         values = values.transpose(1, 2)  # Shape: (b, num_heads, num_tokens, head_dim)
         queries = queries.transpose(1, 2)  # Shape: (b, num_query_groups, num_tokens, head_dim)
-
-        # # Apply RoPE (Rotary Position Embeddings)
-        # keys = compute_rope(keys, self.cos, self.sin)
-        # queries = compute_rope(queries, self.cos, self.sin)
 
         # Expand keys and values to match the number of heads
         keys = keys.repeat_interleave(self.group_size, dim=1)  # Shape: (b, num_heads, num_tokens, head_dim)
