@@ -152,6 +152,7 @@ class PosDecoder(PosDecodeModel):
         self,
         d_model: int,
         nhead: int,
+        num_kv_groups: int,
         num_decoder_layers: int,
         dim_feedforward: int,
         dropout: float,
@@ -170,6 +171,7 @@ class PosDecoder(PosDecodeModel):
         self.model = _build_transformer_decoder(
             d_model=d_model,
             nhead=nhead,
+            num_kv_groups=num_kv_groups,
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,

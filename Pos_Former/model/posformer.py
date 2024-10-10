@@ -43,6 +43,7 @@ class PosFormer(pl.LightningModule):
         self.posdecoder = PosDecoder(
             d_model=d_model,
             nhead=nhead,
+            num_kv_groups=num_kv_groups,
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
