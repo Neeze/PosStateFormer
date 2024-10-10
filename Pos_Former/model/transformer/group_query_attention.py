@@ -47,17 +47,17 @@ class GroupedQueryAttention(nn.Module):
         
         Args:
             query (Tensor): The query embeddings of shape (B, L, D), where L is the target sequence length,
-                            N is the batch size, and E is the embedding dimension.
+                            B is the batch size, and D is the embedding dimension.
             key (Tensor): The key embeddings of shape (B, L, D), where S is the source sequence length,
-                          N is the batch size, and E is the embedding dimension.
+                          B is the batch size, and D is the embedding dimension.
             value (Tensor): The value embeddings of shape (B, L, D), where S is the source sequence length,
-                            N is the batch size, and E is the embedding dimension.
+                            B is the batch size, and D is the embedding dimension.
             key_padding_mask (Optional[Tensor]): If provided, specifies padding elements in the key.
-                                                 Shape should be (B, L), where N is the batch size and S is the source sequence length.
+                                                 Shape should be (B, S), where B is the batch size and S is the source sequence length.
             attn_mask (Optional[Tensor]): If provided, specifies positions that should be masked.
                                           Shape should be (L, S), where L is the target sequence length and S is the source sequence length.
             target_vocab (Optional[Tensor]): If provided, specifies the target vocabulary.
-                                            Shape should be (B, L), where N is the batch size and L is the target sequence length.
+                                            Shape should be (B, L), where B is the batch size and L is the target sequence length.
         Returns:
             attn_output (Tensor): The output embeddings of shape (B, L, D), where L is the target sequence length,
                                   N is the batch size, and E is the embedding dimension.
