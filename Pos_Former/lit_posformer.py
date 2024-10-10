@@ -52,6 +52,8 @@ class LitPosFormer(pl.LightningModule):
             self_coverage=self_coverage,
         )
         self.exprate_recorder = ExpRateRecorder()
+        pytorch_total_params = sum(p.numel() for p in self.model.parameters())
+        print(f"Total params: {pytorch_total_params}")
 
     def forward(
         self, img: FloatTensor, img_mask: LongTensor, tgt: LongTensor, logger
