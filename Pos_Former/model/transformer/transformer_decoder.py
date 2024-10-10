@@ -146,17 +146,6 @@ class TransformerDecoderLayer(nn.Module):
 
         # tgt = rearrange(tgt, "l b d -> b l d")
 
-        # Implement Multihead-Attention
-        # tgt2, attn = self.multihead_attn(
-        #     tgt,
-        #     memory,
-        #     memory,
-        #     arm=arm,
-        #     attn_mask=memory_mask,
-        #     key_padding_mask=memory_key_padding_mask,
-        #     tgt_vocab=tgt_vocab,
-        # )
-
         # Implement Group Query Attention
         tgt2, attn = self.group_attn(
             query=tgt,
