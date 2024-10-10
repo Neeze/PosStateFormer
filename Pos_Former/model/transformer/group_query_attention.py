@@ -105,13 +105,13 @@ class GroupedQueryAttention(nn.Module):
         self.num_heads = num_heads
         self.head_dim = d_out // num_heads
 
-        self.W_key = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False)
-        self.W_value = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False)
+        self.W_key = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=True)
+        self.W_value = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=True)
         self.num_kv_groups = num_kv_groups
         self.group_size = num_heads // num_kv_groups
 
-        self.W_query = nn.Linear(d_in, d_out, bias=False)
-        self.out_proj = nn.Linear(d_out, d_out, bias=False)
+        self.W_query = nn.Linear(d_in, d_out, bias=True)
+        self.out_proj = nn.Linear(d_out, d_out, bias=True)
 
         self.dropout = nn.Dropout(dropout)
 
@@ -181,13 +181,14 @@ class GroupedQueryAttention(nn.Module):
         if attn_mask is not None:
             attn_scores = attn_scores.masked_fill(attn_mask == 1, float('-inf'))
 
-        # Apply ARM if provided
-        if arm is not None and target_vocab is not None:
-            attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"), target_vocab)
-            attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
-            attn_output_weights = attn_scores - attention_refine_reshape
-        else:
-            attn_output_weights = attn_scores
+        # # Apply ARM if provided
+        # if arm is not None and target_vocab is not None:
+        #     attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"), target_vocab)
+        #     attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
+        #     attn_output_weights = attn_scores - attention_refine_reshape
+        # else:
+        #     attn_output_weights = attn_scores
+        attn_output_weights = attn_scores
 
         # Apply softmax and dropout
         attn_output_weights = F.softmax(attn_output_weights, dim=-1)
