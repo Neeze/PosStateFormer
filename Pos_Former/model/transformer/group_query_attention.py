@@ -73,9 +73,9 @@ class GroupedQueryAttention(nn.Module):
         values = self.W_value(value)  # Shape: (b, num_tokens, num_kv_groups * head_dim)
 
         # Reshape queries, keys, and values
-        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)
-        keys = keys.view(b, -1, self.num_kv_groups, self.head_dim)
-        values = values.view(b, -1, self.num_kv_groups, self.head_dim)
+        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim) # Shape: (b, num_tokens, num_heads, head_dim)
+        keys = keys.view(b, -1, self.num_kv_groups, self.head_dim) # Shape: (b, num_tokens, num_kv_groups, head_dim)
+        values = values.view(b, -1, self.num_kv_groups, self.head_dim) # Shape: (b, num_tokens, num_kv_groups, head_dim)
 
         # Transpose keys, values, and queries
         keys = keys.transpose(1, 2)  # Shape: (b, num_heads, num_tokens, head_dim)
@@ -85,7 +85,14 @@ class GroupedQueryAttention(nn.Module):
         # Expand keys and values to match the number of heads
         keys = keys.repeat_interleave(self.group_size, dim=1)  # Shape: (b, num_heads, num_tokens, head_dim)
         values = values.repeat_interleave(self.group_size, dim=1)  # Shape: (b, num_heads, num_tokens, head_dim)
-
+         # For example, before repeat_interleave along dim=1 (query groups):
+        #   [K1, K2]
+        # After repeat_interleave (each query group is repeated group_size times):
+        #   [K1, K1, K2, K2]
+        # If we used regular repeat instead of repeat_interleave, we'd get:
+        #   [K1, K2, K1, K2]
+        # Compute scaled dot-product attention (aka self-attention) with a causal mask
+        # Shape: (b, num_heads, num_tokens, num_tokens)
         # Compute scaled dot-product attention
         attn_scores = queries @ keys.transpose(2, 3)  # Dot product for each head
 
@@ -99,27 +106,22 @@ class GroupedQueryAttention(nn.Module):
         if attn_mask is not None:
             attn_scores = attn_scores.masked_fill(attn_mask == 1, float('-inf'))
 
-        attn_output_weights = attn_scores
+        # Apply softmax and dropout
+        attn_output_weights = F.softmax(attn_scores, dim=-1)
+        attn_output_weights = self.dropout(attn_output_weights)
 
         if arm is not None and target_vocab is not None:
-            attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"),
-                                   target_vocab)
+            attention_refine = arm(curr_attn = rearrange(attn_scores, "b n t s -> (b n) t s"), 
+                                   tgt_vocab = target_vocab)
             attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
             attn_output_weights -= attention_refine_reshape
 
-        # Apply softmax and dropout
-        attn_output_weights = F.softmax(attn_output_weights, dim=-1)
-        attn_output_weights = self.dropout(attn_output_weights)
+        context_vec = (attn_output_weights @ values).transpose(1, 2) # Shape: (b, num_tokens, num_heads, head_dim)
 
-        context_vec = (attn_output_weights @ values).transpose(1, 2)
+        # context_vec = context_vec.transpose(1, 2)
 
-        # Transpose context_vec to match the original shape
-        context_vec = context_vec.transpose(1, 2)  # (b, num_tokens, num_query_groups, head_dim)
-
-        # Combine heads        
+        # Combine heads, where self.d_out = self.num_heads * self.head_dim
         context_vec = context_vec.reshape(b, num_tokens, self.d_out)
-
-        # Final linear projection
         attn_output = self.out_proj(context_vec)
 
         attn_output_weights = rearrange(attn_output_weights, "b n t s -> (b n) t s")
