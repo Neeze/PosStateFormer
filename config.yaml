@@ -29,7 +29,7 @@ model:
   nhead: 16
   num_kv_groups: 4
   num_decoder_layers: 3
-  dim_feedforward: 1024
+  dim_feedforward: 2048
   dropout: 0.3
   dc: 32
   cross_coverage: true
