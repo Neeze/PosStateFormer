@@ -121,7 +121,6 @@ class Decoder(DecodeModel):
 
         src = rearrange(src, "b h w d -> b (h w) d")
         src_mask = rearrange(src_mask, "b h w -> b (h w)")
-        # tgt = rearrange(tgt, "b l d -> l b d")
         
 
         out, attn  = self.model(

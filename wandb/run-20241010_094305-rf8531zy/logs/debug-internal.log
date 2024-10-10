@@ -1,0 +1,11 @@
+{"time":"2024-10-10T09:43:05.2898631+07:00","level":"INFO","msg":"using version","core version":"0.18.3"}
+{"time":"2024-10-10T09:43:05.2898631+07:00","level":"INFO","msg":"created symlink","path":"X:\\Repositories\\PosStateFormer\\wandb\\run-20241010_094305-rf8531zy\\logs\\debug-core.log"}
+{"time":"2024-10-10T09:43:05.3584697+07:00","level":"ERROR","msg":"dialing: google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information"}
+{"time":"2024-10-10T09:43:05.3710053+07:00","level":"INFO","msg":"created new stream","id":"rf8531zy"}
+{"time":"2024-10-10T09:43:05.3710053+07:00","level":"INFO","msg":"stream: started","id":"rf8531zy"}
+{"time":"2024-10-10T09:43:05.3710053+07:00","level":"INFO","msg":"handler: started","stream_id":{"value":"rf8531zy"}}
+{"time":"2024-10-10T09:43:05.3710053+07:00","level":"INFO","msg":"sender: started","stream_id":{"value":"rf8531zy"}}
+{"time":"2024-10-10T09:43:05.3710053+07:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"rf8531zy"}}
+{"time":"2024-10-10T09:43:06.5472696+07:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-10-10T09:43:06.5493486+07:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2024-10-10T09:44:37.9352828+07:00","level":"INFO","msg":"api: retrying HTTP error","status":502,"url":"https://api.wandb.ai/files/AiTA_HMER/hybridformer-mamba/rf8531zy/file_stream"}

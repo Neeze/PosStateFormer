@@ -196,23 +196,15 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply softmax and dropout
         attn_output_weights = F.softmax(attn_output_weights, dim=-1)
-        attn_output_weights = self.dropout(attn_output_weights)
+        # attn_output_weights = self.dropout(attn_output_weights)
 
-        # Reshape for torch.bmm
-        attn_output_weights_reshaped = attn_output_weights.view(b * self.num_query_groups, num_tokens, num_tokens)
-        value_reshaped = value.view(b * self.num_heads, num_tokens, self.head_dim)
-
-        # Compute context vector using torch.bmm
-        context_vec_reshaped = torch.bmm(attn_output_weights_reshaped, value_reshaped)
-
-        # Reshape context_vec back to (b, num_query_groups, num_tokens, head_dim)
-        context_vec = context_vec_reshaped.view(b, self.num_query_groups, num_tokens, self.head_dim)
+        context_vec = (attn_output_weights @ values).transpose(1, 2)
 
         # Transpose context_vec to match the original shape
         context_vec = context_vec.transpose(1, 2)  # (b, num_tokens, num_query_groups, head_dim)
 
-        # Combine heads
-        context_vec = context_vec.reshape(b, num_tokens, self.embed_dim)
+        # Combine heads        
+        context_vec = context_vec.reshape(b, num_tokens, self.d_out)
 
         # Final linear projection
         attn_output = self.out_proj(context_vec)

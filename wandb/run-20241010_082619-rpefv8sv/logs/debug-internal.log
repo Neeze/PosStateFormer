@@ -1,0 +1,10 @@
+{"time":"2024-10-10T08:26:19.3326358+07:00","level":"INFO","msg":"using version","core version":"0.18.3"}
+{"time":"2024-10-10T08:26:19.3326358+07:00","level":"INFO","msg":"created symlink","path":"X:\\Repositories\\PosStateFormer\\wandb\\run-20241010_082619-rpefv8sv\\logs\\debug-core.log"}
+{"time":"2024-10-10T08:26:19.4021755+07:00","level":"ERROR","msg":"dialing: google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information"}
+{"time":"2024-10-10T08:26:19.4133429+07:00","level":"INFO","msg":"created new stream","id":"rpefv8sv"}
+{"time":"2024-10-10T08:26:19.4133429+07:00","level":"INFO","msg":"stream: started","id":"rpefv8sv"}
+{"time":"2024-10-10T08:26:19.4133429+07:00","level":"INFO","msg":"handler: started","stream_id":{"value":"rpefv8sv"}}
+{"time":"2024-10-10T08:26:19.4138489+07:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"rpefv8sv"}}
+{"time":"2024-10-10T08:26:19.4143699+07:00","level":"INFO","msg":"sender: started","stream_id":{"value":"rpefv8sv"}}
+{"time":"2024-10-10T08:26:20.6621877+07:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-10-10T08:26:20.6653383+07:00","level":"INFO","msg":"Starting system monitor"}

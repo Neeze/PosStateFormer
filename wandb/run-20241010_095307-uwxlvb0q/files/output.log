@@ -1,0 +1,11 @@
+GPU available: True, used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+Extract data from: train, with data size: 8834
+image: formulaire026-equation008 size: 258 x 1280 =  bigger than 320000.0, ignore
+image: formulaire027-equation007 size: 183 x 2009 =  bigger than 320000.0, ignore
+total  1501 batch data loaded
+Extract data from: 2014, with data size: 986
+sentence 1 length bigger than 200 ignore
+total  266 batch data loaded
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]

@@ -1,0 +1,27 @@
+GPU available: True, used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+Extract data from: train, with data size: 8834
+image: formulaire026-equation008 size: 258 x 1280 =  bigger than 320000.0, ignore
+image: formulaire027-equation007 size: 183 x 2009 =  bigger than 320000.0, ignore
+total  1501 batch data loaded
+Extract data from: 2014, with data size: 986
+sentence 1 length bigger than 200 ignore
+total  266 batch data loaded
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name             | Type            | Params
+-----------------------------------------------------
+0 | model            | PosFormer       | 3.2 M
+1 | exprate_recorder | ExpRateRecorder | 0
+-----------------------------------------------------
+3.2 M     Trainable params
+0         Non-trainable params
+3.2 M     Total params
+12.701    Total estimated model params size (MB)
+Validation sanity check:   0%|                                                                                                 | 0/1 [00:00<?, ?it/s]
+Exception ignored in tp_clear of: <class 'memoryview'>
+Traceback (most recent call last):
+  File "c:\Users\Admin\miniconda3\envs\posformer\lib\site-packages\torch\_tensor_str.py", line 376, in get_summarized_data
+    return torch.cat(
+BufferError: memoryview has 1 exported buffer

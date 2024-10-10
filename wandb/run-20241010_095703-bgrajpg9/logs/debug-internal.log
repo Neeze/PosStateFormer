@@ -1,0 +1,10 @@
+{"time":"2024-10-10T09:57:03.0449667+07:00","level":"INFO","msg":"using version","core version":"0.18.3"}
+{"time":"2024-10-10T09:57:03.0449667+07:00","level":"INFO","msg":"created symlink","path":"X:\\Repositories\\PosStateFormer\\wandb\\run-20241010_095703-bgrajpg9\\logs\\debug-core.log"}
+{"time":"2024-10-10T09:57:03.133995+07:00","level":"ERROR","msg":"dialing: google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information"}
+{"time":"2024-10-10T09:57:03.1465099+07:00","level":"INFO","msg":"created new stream","id":"bgrajpg9"}
+{"time":"2024-10-10T09:57:03.1470336+07:00","level":"INFO","msg":"stream: started","id":"bgrajpg9"}
+{"time":"2024-10-10T09:57:03.1470336+07:00","level":"INFO","msg":"handler: started","stream_id":{"value":"bgrajpg9"}}
+{"time":"2024-10-10T09:57:03.1470336+07:00","level":"INFO","msg":"sender: started","stream_id":{"value":"bgrajpg9"}}
+{"time":"2024-10-10T09:57:03.1470336+07:00","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"bgrajpg9"}}
+{"time":"2024-10-10T09:57:04.4044159+07:00","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2024-10-10T09:57:04.4062827+07:00","level":"INFO","msg":"Starting system monitor"}

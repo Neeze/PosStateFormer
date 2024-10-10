@@ -9,6 +9,7 @@ from torch import Tensor
 from .arm import AttentionRefinementModule
 from .attention import MultiheadAttention
 from .group_query_attention import GroupedQueryAttention
+from einops import rearrange
 
 
 def _get_clones(module, N):
@@ -80,18 +81,15 @@ class FeedForward(nn.Module):
 class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
-        # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+
         # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
-        assert nhead >= 4, "Num of head must > 4 to using Group Query Attention"
+        assert nhead >= 4, "Num of head must >= 4 to using Group Query Attention"
         self.group_attn = GroupedQueryAttention(d_in=d_model,
                                                 d_out=d_model,
                                                 num_heads=nhead,
                                                 num_kv_groups=nhead//4)
 
-        # Implementation of Feedforward model
-        # self.linear1 = nn.Linear(d_model, dim_feedforward)
-        # self.dropout = nn.Dropout(dropout)
-        # self.linear2 = nn.Linear(dim_feedforward, d_model)
         self.ff = FeedForward(d_model=d_model, dim_feedforward=dim_feedforward)
 
         self.norm1 = nn.RMSNorm(d_model, eps=1e-5)
@@ -133,11 +131,16 @@ class TransformerDecoderLayer(nn.Module):
         Shape:
             see the docs in Transformer class.
         """
+        tgt = rearrange(tgt, "b l d -> l b d")
+
         tgt2 = self.self_attn(
             tgt, tgt, tgt, attn_mask=tgt_mask, key_padding_mask=tgt_key_padding_mask
         )[0]
+
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
+
+        tgt = rearrange(tgt, "l b d -> b l d")
 
         # Implement Multihead-Attention
         # tgt2, attn = self.multihead_attn(
@@ -158,7 +161,7 @@ class TransformerDecoderLayer(nn.Module):
             arm=arm,
             attn_mask=memory_mask,
             key_padding_mask=memory_key_padding_mask,
-            tgt_vocab=tgt_vocab,
+            target_vocab=tgt_vocab,
         )
 
         tgt = tgt + self.dropout2(tgt2)
