@@ -135,7 +135,7 @@ class TransformerDecoderLayer(nn.Module):
         Shape:
             see the docs in Transformer class.
         """
-        tgt = rearrange(tgt, "b l d -> l b d")
+        # tgt = rearrange(tgt, "b l d -> l b d")
 
         tgt2 = self.self_attn(
             tgt, tgt, tgt, attn_mask=tgt_mask, key_padding_mask=tgt_key_padding_mask
@@ -144,7 +144,7 @@ class TransformerDecoderLayer(nn.Module):
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
 
-        tgt = rearrange(tgt, "l b d -> b l d")
+        # tgt = rearrange(tgt, "l b d -> b l d")
 
         # Implement Multihead-Attention
         # tgt2, attn = self.multihead_attn(
