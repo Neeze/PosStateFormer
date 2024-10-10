@@ -115,9 +115,6 @@ class Decoder(DecodeModel):
         tgt = self.norm(tgt)
         
         h = src.shape[1]
-        # src = rearrange(src, "b h w d -> (h w) b d")
-        # src_mask = rearrange(src_mask, "b h w -> b (h w)")
-        # tgt = rearrange(tgt, "b l d -> l b d")
 
         src = rearrange(src, "b h w d -> b (h w) d")
         src_mask = rearrange(src_mask, "b h w -> b (h w)")
@@ -229,9 +226,9 @@ class PosDecoder(PosDecodeModel):
 
 
         h = src.shape[1]
-        src = rearrange(src, "b h w d -> (h w) b d")
+        src = rearrange(src, "b h w d -> b (h w) d")
         src_mask = rearrange(src_mask, "b h w -> b (h w)")
-        pos_tgt = rearrange(pos_tgt, "b l d -> l b d")
+        # pos_tgt = rearrange(pos_tgt, "b l d -> l b d")
 
         out, attn = self.model(
             tgt=pos_tgt,
