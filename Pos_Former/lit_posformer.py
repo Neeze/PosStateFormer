@@ -172,7 +172,7 @@ class LitPosFormer(pl.LightningModule):
             self.parameters(),
             lr=self.hparams.learning_rate,
             momentum=0.9,
-            weight_decay=1e-4,
+            weight_decay=5e-3,
         )
         
         reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
