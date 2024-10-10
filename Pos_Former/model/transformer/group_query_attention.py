@@ -6,88 +6,6 @@ from .arm import AttentionRefinementModule
 from torch import Tensor
 from einops import rearrange
 
-def precompute_rope_params(head_dim, theta_base=10000, context_length=4096, freq_config=None):
-    assert head_dim % 2 == 0, "Embedding dimension must be even"
-
-    # Compute the inverse frequencies
-    inv_freq = 1.0 / (theta_base ** (torch.arange(0, head_dim // 2) / (head_dim // 2)))
-
-    # Frequency adjustments
-    if freq_config is not None:
-        low_freq_wavelen = freq_config["original_context_length"] / freq_config["low_freq_factor"]
-        high_freq_wavelen = freq_config["original_context_length"] / freq_config["high_freq_factor"]
-
-        wavelen = 2 * torch.pi / inv_freq
-
-        inv_freq_llama = torch.where(
-            wavelen > low_freq_wavelen, inv_freq / freq_config["factor"], inv_freq
-        )
-
-        smooth_factor = (freq_config["original_context_length"] / wavelen - freq_config["low_freq_factor"]) / (
-            freq_config["high_freq_factor"] - freq_config["low_freq_factor"]
-        )
-
-        smoothed_inv_freq = (
-            (1 - smooth_factor) * (inv_freq / freq_config["factor"]) + smooth_factor * inv_freq
-        )
-
-        is_medium_freq = (wavelen <= low_freq_wavelen) & (wavelen >= high_freq_wavelen)
-        inv_freq_llama = torch.where(is_medium_freq, smoothed_inv_freq, inv_freq_llama)
-        inv_freq = inv_freq_llama
-
-    # Generate position indices
-    positions = torch.arange(context_length)
-
-    # Compute the angles
-    angles = positions[:, None] * inv_freq[None, :]  # Shape: (context_length, head_dim // 2)
-
-    # Expand angles to match the head_dim
-    angles = torch.cat([angles, angles], dim=1)  # Shape: (context_length, head_dim)
-
-    # Precompute sine and cosine
-    cos = torch.cos(angles)
-    sin = torch.sin(angles)
-
-    return cos, sin
-
-
-def compute_rope(x, cos, sin):
-    # x: (batch_size, num_heads, seq_len, head_dim)
-    batch_size, num_heads, seq_len, head_dim = x.shape
-    assert head_dim % 2 == 0, "Head dimension must be even"
-
-    # Split x into first half and second half
-    x1 = x[..., : head_dim // 2]  # First half
-    x2 = x[..., head_dim // 2 :]  # Second half
-
-    # Adjust sin and cos shapes
-    cos = cos[:seq_len, :].unsqueeze(0).unsqueeze(0)  # Shape: (1, 1, seq_len, head_dim)
-    sin = sin[:seq_len, :].unsqueeze(0).unsqueeze(0)
-
-    # Apply the rotary transformation
-    rotated = torch.cat((-x2, x1), dim=-1)
-    x_rotated = (x * cos) + (rotated * sin)
-
-    return x_rotated.to(dtype=x.dtype)
-
-class SharedBuffers:
-    _buffers = {}
-
-    @staticmethod
-    def get_buffers(context_length, head_dim, rope_base, freq_config, dtype=torch.float32):
-        key = (context_length, head_dim, rope_base, tuple(freq_config.values()) if freq_config else freq_config, dtype)
-
-        if key not in SharedBuffers._buffers:
-            # Create or fetch the buffers
-            mask = torch.triu(torch.ones(context_length, context_length), diagonal=1)
-            cos, sin = precompute_rope_params(head_dim, rope_base, context_length, freq_config)
-            if dtype is not None:
-                cos = cos.to(dtype)
-                sin = sin.to(dtype)
-            SharedBuffers._buffers[key] = (mask, cos, sin)
-
-        return SharedBuffers._buffers[key]
-
 class GroupedQueryAttention(nn.Module):
     def __init__(
             self, 
@@ -182,13 +100,12 @@ class GroupedQueryAttention(nn.Module):
             attn_scores = attn_scores.masked_fill(attn_mask == 1, float('-inf'))
 
         attn_output_weights = attn_scores
-        # Apply ARM if provided
-        # if arm is not None and target_vocab is not None:
-        #     attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"), target_vocab)
-        #     attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
-        #     attn_output_weights -= attention_refine_reshape
-        # else:
-        #     attn_output_weights = attn_scores
+
+        if arm is not None and target_vocab is not None:
+            attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"),
+                                   target_vocab)
+            attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
+            attn_output_weights -= attention_refine_reshape
 
         # Apply softmax and dropout
         attn_output_weights = F.softmax(attn_output_weights, dim=-1)
