@@ -81,8 +81,12 @@ class FeedForward(nn.Module):
 class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model, nhead, num_kv_groups, dim_feedforward=2048, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
-        self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
-
+        # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        self.self_attn = GroupedQueryAttention(d_in=d_model,
+                                                d_out=d_model,
+                                                num_heads=nhead,
+                                                num_kv_groups=num_kv_groups,
+                                                dropout=dropout)
         # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         self.group_attn = GroupedQueryAttention(d_in=d_model,
                                                 d_out=d_model,
