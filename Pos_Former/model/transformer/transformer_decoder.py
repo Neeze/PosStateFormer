@@ -69,17 +69,15 @@ class FeedForward(nn.Module):
     def __init__(self, d_model, dim_feedforward):
         super().__init__()
         self.fc1 = nn.Linear(d_model, dim_feedforward, bias=False)
-        self.fc2 = nn.Linear(d_model, dim_feedforward, bias=False)
-        self.fc3 = nn.Linear(dim_feedforward, d_model, bias=False)
+        self.fc2 = nn.Linear(dim_feedforward, d_model, bias=False)
 
     def forward(self, x):
         x_fc1 = self.fc1(x)
-        x_fc2 = self.fc2(x)
-        x = nn.functional.silu(x_fc1) * x_fc2
-        return self.fc3(x)
+        x = nn.functional.silu(x_fc1)
+        return self.fc2(x)
 
 class TransformerDecoderLayer(nn.Module):
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1):
+    def __init__(self, d_model, nhead, num_kv_groups, dim_feedforward=2048, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
         self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
 
@@ -87,7 +85,7 @@ class TransformerDecoderLayer(nn.Module):
         self.group_attn = GroupedQueryAttention(d_in=d_model,
                                                 d_out=d_model,
                                                 num_heads=nhead,
-                                                num_kv_groups=nhead//2,
+                                                num_kv_groups=num_kv_groups,
                                                 dropout=dropout)
 
         self.ff = FeedForward(d_model=d_model, dim_feedforward=dim_feedforward)

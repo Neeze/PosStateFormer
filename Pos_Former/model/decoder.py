@@ -18,6 +18,7 @@ from Pos_Former.utils.generation_utils import DecodeModel, PosDecodeModel
 def _build_transformer_decoder(
     d_model: int,
     nhead: int,
+    num_kv_groups: int,
     num_decoder_layers: int,
     dim_feedforward: int,
     dropout: float,
@@ -28,6 +29,7 @@ def _build_transformer_decoder(
     decoder_layer = TransformerDecoderLayer(
         d_model=d_model,
         nhead=nhead,
+        num_kv_groups=num_kv_groups,
         dim_feedforward=dim_feedforward,
         dropout=dropout,
     )
@@ -45,6 +47,7 @@ class Decoder(DecodeModel):
         self,
         d_model: int,
         nhead: int,
+        num_kv_groups: int,
         num_decoder_layers: int,
         dim_feedforward: int,
         dropout: float,
@@ -64,6 +67,7 @@ class Decoder(DecodeModel):
         self.model = _build_transformer_decoder(
             d_model=d_model,
             nhead=nhead,
+            num_kv_groups=num_kv_groups,
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,

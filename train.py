@@ -40,6 +40,7 @@ def train(config):
 
         # decoder
         nhead = config.model.nhead,
+        num_kv_groups = config.model.num_kv_groups,
         num_decoder_layers = config.model.num_decoder_layers,
         dim_feedforward = config.model.dim_feedforward,
         dropout = config.model.dropout,

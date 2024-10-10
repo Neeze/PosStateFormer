@@ -20,6 +20,7 @@ class LitPosFormer(pl.LightningModule):
         num_layers: int,
         # decoder
         nhead: int,
+        num_kv_groups: int,
         num_decoder_layers: int,
         dim_feedforward: int,
         dropout: float,
@@ -44,6 +45,7 @@ class LitPosFormer(pl.LightningModule):
             growth_rate=growth_rate,
             num_layers=num_layers,
             nhead=nhead,
+            num_kv_groups=num_kv_groups,
             num_decoder_layers=num_decoder_layers,
             dim_feedforward=dim_feedforward,
             dropout=dropout,
