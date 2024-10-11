@@ -111,7 +111,7 @@ class GroupedQueryAttention(nn.Module):
         attn_output_weights = self.dropout(attn_output_weights)
 
         if arm is not None and target_vocab is not None:
-            attention_refine = arm(curr_attn = rearrange(attn_scores, "b n t s -> (b n) t s"))
+            attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"))
             attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
             attn_output_weights -= attention_refine_reshape
 
