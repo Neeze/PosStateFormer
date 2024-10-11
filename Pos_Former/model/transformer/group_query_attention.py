@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple
-from .arm import AttentionRefinementModule
+from .comer_arm import AttentionRefinementModule
 from torch import Tensor
 from einops import rearrange
 
