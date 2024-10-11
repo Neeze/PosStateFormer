@@ -112,7 +112,7 @@ class GroupedQueryAttention(nn.Module):
 
         if arm is not None and target_vocab is not None:
             attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"))
-            attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b)
+            attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b, n=self.num_heads)
             attn_output_weights -= attention_refine_reshape
 
         context_vec = (attn_output_weights @ values).transpose(1, 2) # Shape: (b, num_tokens, num_heads, head_dim)

@@ -75,7 +75,7 @@ class AttentionRefinementModule(nn.Module):
             [(b * nhead), t, l]
         """
         t = curr_attn.shape[1]
-        mask = repeat(key_padding_mask, "b (h w) -> (b t) () h w", h=h, t=t)
+        mask = repeat(key_padding_mask, "b (h w) -> (b t) () h w", h=h, t=self.nhead)
 
         curr_attn = rearrange(curr_attn, "(b n) t l -> b n t l", n=self.nhead)
         prev_attn = rearrange(prev_attn, "(b n) t l -> b n t l", n=self.nhead)
