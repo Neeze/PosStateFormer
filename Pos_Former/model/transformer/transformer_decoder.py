@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
-from .arm import AttentionRefinementModule
+from .comer_arm import AttentionRefinementModule
 from .attention import MultiheadAttention
 from .group_query_attention import GroupedQueryAttention
 from einops import rearrange
