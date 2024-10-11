@@ -34,7 +34,7 @@ def _build_transformer_decoder(
         dropout=dropout,
     )
     if cross_coverage or self_coverage:
-        arm = AttentionRefinementModule(nhead, dc, cross_coverage, self_coverage)
+        arm = AttentionRefinementModule(num_kv_groups, dc, cross_coverage, self_coverage)
     else:
         arm = None
 
