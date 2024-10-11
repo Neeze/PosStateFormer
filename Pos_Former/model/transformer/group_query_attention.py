@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple
-from .comer_arm import AttentionRefinementModule
+from .arm import AttentionRefinementModule
 from torch import Tensor
 from einops import rearrange
 
@@ -111,7 +111,7 @@ class GroupedQueryAttention(nn.Module):
         attn_output_weights = self.dropout(attn_output_weights)
 
         if arm is not None and target_vocab is not None:
-            attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"))
+            attention_refine = arm(rearrange(attn_scores, "b n t s -> (b n) t s"), target_vocab)
             attention_refine_reshape = rearrange(attention_refine, "(b n) t s -> b n t s", b=b, n=self.num_heads)
             attn_output_weights -= attention_refine_reshape
 
