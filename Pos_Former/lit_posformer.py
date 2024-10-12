@@ -172,20 +172,20 @@ class LitPosFormer(pl.LightningModule):
         return self.model.beam_search(img, mask, **self.hparams)
 
     def configure_optimizers(self):
-        # optimizer = optim.SGD(
-        #     self.parameters(),
-        #     lr=self.hparams.learning_rate,
-        #     momentum=0.9,
-        #     weight_decay=1e-4,
-        # )
-
-        optimizer = optim.AdamW(
+        optimizer = optim.SGD(
             self.parameters(),
             lr=self.hparams.learning_rate,
-            betas=(0.885, 0.995),
-            eps=1e-8,
+            momentum=0.9,
             weight_decay=1e-4,
         )
+
+        # optimizer = optim.AdamW(
+        #     self.parameters(),
+        #     lr=self.hparams.learning_rate,
+        #     betas=(0.885, 0.995),
+        #     eps=1e-8,
+        #     weight_decay=1e-4,
+        # )
         
         reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             optimizer,
