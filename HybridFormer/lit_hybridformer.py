@@ -179,58 +179,26 @@ class LitPosFormer(pl.LightningModule):
         return self.model.beam_search(img, mask, **self.hparams)
 
     def configure_optimizers(self):
-        # optimizer = optim.SGD(
-        #     self.parameters(),
-        #     lr=self.hparams.learning_rate,
-        #     momentum=0.9,
-        #     weight_decay=1e-4,
-        # )
-
-        optimizer = optim.AdamW(
+        optimizer = optim.SGD(
             self.parameters(),
             lr=self.hparams.learning_rate,
-            betas=(0.9, 0.999),
-            eps=1e-8,
+            momentum=0.9,
             weight_decay=1e-4,
         )
-
-
-        # reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        #     optimizer,
-        #     mode="max",
-        #     factor=0.25,
-        #     patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
-        # )
-
-        # reduce_scheduler = self.cosine_scheduler(
-        #     optimizer,
-        #     training_steps=self.trainer.max_steps,
-        #     warmup_steps=self.hparams.warmup_steps,
-        # )
-
-        # scheduler = {
-        #     "scheduler": reduce_scheduler,
-        #     "monitor": "val_ExpRate",
-        #     "interval": "epoch",
-        #     "frequency": self.trainer.check_val_every_n_epoch,
-        #     "strict": True,
-        # }
-
-        reduce_scheduler = self.exponential_scheduler(
-                optimizer,
-                self.hparams.warmup_steps,
-                self.hparams.learning_rate,
-                self.hparams.min_learning_rate,
-                self.hparams.gamma,
-            )
+        
+        reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode="max",
+            factor=0.25,
+            patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
+        )
         scheduler = {
             "scheduler": reduce_scheduler,
             "monitor": "val_ExpRate",
-            "interval": "step",
-            "frequency": 100,
+            "interval": "epoch",
+            "frequency": self.trainer.check_val_every_n_epoch,
             "strict": True,
         }
-        
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
     
     @staticmethod

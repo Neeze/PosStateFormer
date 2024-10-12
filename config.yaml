@@ -41,10 +41,7 @@ model:
   early_stopping: true
   temperature: 1.0
   # training
-  warmup_steps: 250
-  learning_rate: 0.05
-  min_learning_rate: 5e-5
-  gamma: 0.955
+  learning_rate: 0.08
   patience: 20
 data:
   zipfile_path: data_crohme.zip

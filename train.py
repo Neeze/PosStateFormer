@@ -53,10 +53,7 @@ def train(config):
         early_stopping = config.model.early_stopping,
         temperature = config.model.temperature,
         # training
-        warmup_steps = config.model.warmup_steps,
         learning_rate = config.model.learning_rate,
-        min_learning_rate = config.model.min_learning_rate,
-        gamma = config.model.gamma,
         patience = config.model.patience,
     )
     data_module = CROHMEDatamodule(
