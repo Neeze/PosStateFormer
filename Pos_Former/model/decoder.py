@@ -62,7 +62,7 @@ class Decoder(DecodeModel):
         )
         self.pos_enc = WordPosEnc(d_model=d_model)
 
-        self.norm = nn.LayerNorm(d_model)
+        self.norm = nn.RMSNorm(d_model, eps=1e-5)
 
         self.model = _build_transformer_decoder(
             d_model=d_model,
