@@ -108,7 +108,7 @@ class GroupedQueryAttention(nn.Module):
 
         # Apply softmax and dropout
         attn_output_weights = F.softmax(attn_scores, dim=-1)
-        attn_output_weights = self.dropout(attn_output_weights)
+        # attn_output_weights = self.dropout(attn_output_weights)
 
         # if arm is not None and target_vocab is not None:
         #     attention_refine = arm(curr_attn = rearrange(attn_scores, "b n t s -> (b n) t s"), 
