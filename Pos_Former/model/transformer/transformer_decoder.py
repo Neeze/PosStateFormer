@@ -81,12 +81,12 @@ class FeedForward(nn.Module):
 class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model, nhead, num_kv_groups, dim_feedforward=2048, dropout=0.1):
         super(TransformerDecoderLayer, self).__init__()
-        self.self_attn = MultiheadAttention(d_model, nhead // 2, dropout=dropout)
-        # self.self_attn = GroupedQueryAttention(d_in=d_model,
-        #                                         d_out=d_model,
-        #                                         num_heads=nhead,
-        #                                         num_kv_groups=num_kv_groups,
-        #                                         dropout=dropout)
+        # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        self.self_attn = GroupedQueryAttention(d_in=d_model,
+                                                d_out=d_model,
+                                                num_heads=nhead,
+                                                num_kv_groups=num_kv_groups,
+                                                dropout=dropout)
         # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         self.group_attn = GroupedQueryAttention(d_in=d_model,
                                                 d_out=d_model,
@@ -135,7 +135,7 @@ class TransformerDecoderLayer(nn.Module):
         Shape:
             see the docs in Transformer class.
         """
-        tgt = rearrange(tgt, "b l d -> l b d")
+        # tgt = rearrange(tgt, "b l d -> l b d")
 
         tgt2 = self.self_attn(
             tgt, tgt, tgt, attn_mask=tgt_mask, key_padding_mask=tgt_key_padding_mask
@@ -144,7 +144,7 @@ class TransformerDecoderLayer(nn.Module):
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
 
-        tgt = rearrange(tgt, "l b d -> b l d")
+        # tgt = rearrange(tgt, "l b d -> b l d")
 
         # Implement Group Query Attention
         tgt2, attn = self.group_attn(
