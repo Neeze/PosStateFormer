@@ -248,9 +248,9 @@ class PosDecoder(PosDecodeModel):
             memory_key_padding_mask=src_mask,
             tgt_vocab=tgt_vocab,
         )
-        out_rearrange = rearrange(out, "l b d -> b l d")
-        out_pos=self.pos_proj(out_rearrange)
-        out_layernum=self.layernum_proj(out_rearrange)
+        # out_rearrange = rearrange(out, "l b d -> b l d")
+        out_pos=self.pos_proj(out)
+        out_layernum=self.layernum_proj(out)
         return out_layernum , out_pos, attn
 
     def transform(
