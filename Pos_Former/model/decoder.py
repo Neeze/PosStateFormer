@@ -166,7 +166,7 @@ class PosDecoder(PosDecodeModel):
         )  #[2b,l,5]  -->  [2b,l,256]
         self.pos_enc = WordPosEnc(d_model=d_model)
         self.dropout = nn.Dropout(p=dropout)
-        self.norm = nn.LayerNorm(d_model)
+        self.norm = nn.RMSNorm(d_model, eps=1e-5)
 
         self.model = _build_transformer_decoder(
             d_model=d_model,
