@@ -63,7 +63,6 @@ class TransformerDecoder(nn.Module):
 
         return output, attn
 
-
 class FeedForward(nn.Module):
     def __init__(self, d_model, dim_feedforward):
         super().__init__()

@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 import torch.nn.functional as F
 from typing import Optional, Tuple
 from .comer_arm import AttentionRefinementModule
@@ -19,17 +20,39 @@ class GroupedQueryAttention(nn.Module):
         assert d_out % num_heads == 0, "d_out must be divisible by num_heads"
         assert num_heads % num_kv_groups == 0, "num_heads must be divisible by num_kv_groups"
 
+        
+        self.head_dim = d_out // num_heads
+        if not self.head_dim % 8 == 0:
+            raise ValueError(
+                f"head_dim (embed_dim / num_heads = {self.head_dim}) must be divisible by 8"
+            )
+        if not self.head_dim <= 128:
+            raise ValueError(
+                f"head_dim (embed_dim / num_heads = {self.head_dim}) must be <= 128"
+            )
+
         self.d_out = d_out
         self.num_heads = num_heads
         self.head_dim = d_out // num_heads
-
-        self.W_key = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False)
-        self.W_value = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=False)
         self.num_kv_groups = num_kv_groups
         self.group_size = num_heads // num_kv_groups
 
-        self.W_query = nn.Linear(d_in, d_out, bias=False)
-        self.out_proj = nn.Linear(d_out, d_out, bias=False)
+        self.W_key = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=True)
+        self.W_value = nn.Linear(d_in, num_kv_groups * self.head_dim, bias=True)
+        self.W_query = nn.Linear(d_in, d_out, bias=True)
+        # Initialize parameters with Xavier uniform
+        init.xavier_uniform_(self.W_key.weight)
+        init.xavier_uniform_(self.W_value.weight)
+        init.xavier_uniform_(self.W_query.weight)
+        
+        if self.W_key.bias is not None:
+            init.zeros_(self.W_key.bias)
+        if self.W_value.bias is not None:
+            init.zeros_(self.W_value.bias)
+        if self.W_query.bias is not None:
+            init.zeros_(self.W_query.bias)
+
+        self.out_proj = nn.Linear(d_out, d_out, bias=True)
 
         self.dropout = nn.Dropout(dropout)
 
