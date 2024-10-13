@@ -65,7 +65,7 @@ def train(config):
         num_workers = config.data.num_workers,
         scale_aug = config.data.scale_aug,)
     
-    logger = Logger("HybridFormer Project", project="group query attention", config=dict(config), log_model='all')
+    logger = Logger("HybridFormer Project", project="group query attention - ARM", config=dict(config), log_model='all')
     logger.watch(model_module.model, log="all", log_freq=100)
 
     lr_callback = LearningRateMonitor(logging_interval=config.trainer.callbacks[0].init_args.logging_interval)
