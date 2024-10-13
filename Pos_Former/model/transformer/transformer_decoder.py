@@ -89,7 +89,7 @@ class TransformerDecoderLayer(nn.Module):
         #                                         dropout=dropout)
         # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         self.group_attn = GroupedQueryAttention(d_in=d_model,
-                                                d_out=d_model,
+                                                d_out=2*d_model,
                                                 num_heads=nhead,
                                                 num_kv_groups=num_kv_groups,
                                                 dropout=dropout)
