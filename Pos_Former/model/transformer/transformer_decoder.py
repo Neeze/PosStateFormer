@@ -84,7 +84,7 @@ class FeedForward(nn.Module):
         super().__init__()
         self.fc1 = nn.Linear(d_model, dim_feedforward, bias=False)
         self.dropout = nn.Dropout(dropout)
-        self.fc2 = nn.Linear(d_model, dim_feedforward, bias=False)
+        self.fc2 = nn.Linear(dim_feedforward, d_model, bias=False)
 
     def forward(self, x):
         x_fc1 = self.fc1(x)
