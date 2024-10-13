@@ -7,7 +7,7 @@ from torch import FloatTensor, LongTensor
 import numpy as np
 from Pos_Former.datamodule import vocab, vocab_size 
 from Pos_Former.model.pos_enc import WordPosEnc
-from Pos_Former.model.transformer.arm import AttentionRefinementModule
+from Pos_Former.model.transformer.comer_arm import AttentionRefinementModule
 from Pos_Former.model.transformer.transformer_decoder import (
     TransformerDecoder,
     TransformerDecoderLayer,
