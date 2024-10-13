@@ -166,7 +166,7 @@ class GroupedQueryAttention(nn.Module):
         context_vec = rearrange(context_vec, "b g h n d -> b n (g h d)")
         attn_output = self.out_proj(context_vec)
 
-        attn_output_weights = rearrange(attn_output_weights, "b n t s -> (b n) t s")
+        attn_output_weights = rearrange(attn_output_weights, "b g h t s -> (b g h) t s")
 
         if need_weights:
             return attn_output, attn_output_weights
