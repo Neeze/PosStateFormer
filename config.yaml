@@ -27,13 +27,13 @@ model:
   num_layers: 16
   # decoder
   nhead: 16
-  num_kv_groups: 4
+  num_kv_groups: 8
   num_decoder_layers: 3
-  dim_feedforward: 2048
+  dim_feedforward: 1024
   dropout: 0.3
   dc: 32
-  cross_coverage: true
-  self_coverage: true
+  cross_coverage: false
+  self_coverage: false
   # beam search
   beam_size: 10
   max_len: 200
@@ -42,11 +42,11 @@ model:
   temperature: 1.0
   # training
   learning_rate: 0.08
-  patience: 20
+  patience: 10
 data:
   zipfile_path: data_crohme.zip
   test_year: '2014' 
   train_batch_size: 8
   eval_batch_size: 4
-  num_workers: 5
+  num_workers: 2
   scale_aug: True
