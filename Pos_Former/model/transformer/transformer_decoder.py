@@ -65,18 +65,33 @@ class TransformerDecoder(nn.Module):
         return output, attn
 
 
+# class FeedForward(nn.Module):
+#     def __init__(self, d_model, dim_feedforward):
+#         super().__init__()
+#         self.fc1 = nn.Linear(d_model, dim_feedforward, bias=False)
+#         self.fc2 = nn.Linear(d_model, dim_feedforward, bias=False)
+#         self.fc3 = nn.Linear(dim_feedforward, d_model, bias=False)
+
+#     def forward(self, x):
+#         x_fc1 = self.fc1(x)
+#         x_fc2 = self.fc2(x)
+#         x = nn.functional.silu(x_fc1) * x_fc2
+#         return self.fc3(x)
+    
+
 class FeedForward(nn.Module):
-    def __init__(self, d_model, dim_feedforward):
+    def __init__(self, d_model, dim_feedforward, dropout=0.1):
         super().__init__()
         self.fc1 = nn.Linear(d_model, dim_feedforward, bias=False)
+        self.dropout = nn.Dropout(dropout)
         self.fc2 = nn.Linear(d_model, dim_feedforward, bias=False)
-        self.fc3 = nn.Linear(dim_feedforward, d_model, bias=False)
 
     def forward(self, x):
         x_fc1 = self.fc1(x)
-        x_fc2 = self.fc2(x)
-        x = nn.functional.silu(x_fc1) * x_fc2
-        return self.fc3(x)
+        x_fc1 = nn.functional.silu(x_fc1)
+        x_fc1 = self.dropout(x_fc1)
+        return self.fc2(x_fc1)
+
 
 class TransformerDecoderLayer(nn.Module):
     def __init__(self, d_model, nhead, num_kv_groups, dim_feedforward=2048, dropout=0.1):
@@ -94,7 +109,9 @@ class TransformerDecoderLayer(nn.Module):
                                                 num_kv_groups=num_kv_groups,
                                                 dropout=dropout)
 
-        self.ff = FeedForward(d_model=d_model, dim_feedforward=dim_feedforward)
+        self.ff = FeedForward(d_model=d_model, 
+                              dim_feedforward=dim_feedforward, 
+                              dropout=dropout)
 
         self.norm1 = nn.RMSNorm(d_model, eps=1e-5)
         self.norm2 = nn.RMSNorm(d_model, eps=1e-5)
