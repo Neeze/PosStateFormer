@@ -153,12 +153,6 @@ class HybridDecoderLayer(nn.Module):
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
 
-        # Mamba
-        tgt = rearrange(tgt, "l b d -> b l d")
-        tgt = tgt + self.dropout3(self.mamba(tgt))
-        tgt = rearrange(tgt, "b l d -> l b d")
-        tgt = self.norm3(tgt)
-
         # Cross-Attention
         tgt2, attn = self.multihead_attn(
             tgt,
@@ -171,11 +165,12 @@ class HybridDecoderLayer(nn.Module):
         )
         tgt = tgt + self.dropout2(tgt2)
         tgt = self.norm2(tgt) # l b d 
-
-        # tgt = rearrange(tgt, "l b d -> b l d")
-        # tgt = tgt + self.dropout3(self.mamba(tgt))
-        # tgt = rearrange(tgt, "b l d -> l b d")
-        # tgt = self.norm3(tgt)
+        
+        # Mamba
+        tgt = rearrange(tgt, "l b d -> b l d")
+        tgt = tgt + self.dropout3(self.mamba(tgt))
+        tgt = rearrange(tgt, "b l d -> l b d")
+        tgt = self.norm3(tgt)
         
         # Feedforward
         tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
